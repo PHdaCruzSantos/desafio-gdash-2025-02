@@ -1,0 +1,40 @@
+services:
+  # Expondo portas da infra para acessarmos localmente
+  rabbitmq:
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_UI_PORT}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  mongodb:
+    ports:
+      - "${MONGO_PORT}:27017"
+
+  # --- Configurações de DEV das Apps (Habilitaremos em breve) ---
+
+  # weather-collector:
+  #   command: python main.py # ou um comando de watch
+  #   volumes:
+  #     - ./weather-collector:/app
+
+  # weather-worker:
+  #   # No Go, usaremos o Air para hot-reload depois
+  #   volumes:
+  #     - ./weather-worker:/app
+
+  # backend:
+  #   command: npm run start:dev
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./backend-api:/app
+  #     - /app/node_modules
+
+  # frontend:
+  #   command: npm run dev -- --host
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend-dashboard:/app
+  #     - /app/node_modules
