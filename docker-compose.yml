@@ -22,6 +22,16 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  # 🐍 Weather Collector (Python)
+  weather-collector:
+    build:
+      context: ./collector-weather
+      dockerfile: Dockerfile
+    container_name: collector_weather
+    depends_on:
+      - rabbitmq
+    env_file: .env
+
 volumes:
   mongodb_data:
   rabbitmq_data:
