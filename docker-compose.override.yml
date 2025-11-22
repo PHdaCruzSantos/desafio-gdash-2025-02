@@ -7,6 +7,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./collector-weather:/app
+      - ./worker-weather:/app
 
   mongodb:
     ports:

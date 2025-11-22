@@ -32,6 +32,20 @@ services:
       - rabbitmq
     env_file: .env
 
+  # 🐹 Worker (Go)
+  weather-worker:
+    build:
+      context: ./worker-weather
+      dockerfile: Dockerfile
+    container_name: worker_weather
+    depends_on:
+      - rabbitmq
+      - mongodb # quando for usar mongo cai precisar
+    env_file: .env
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+
 volumes:
   mongodb_data:
   rabbitmq_data:
