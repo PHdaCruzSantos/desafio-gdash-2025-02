@@ -27,7 +27,7 @@ services:
     build:
       context: ./collector-weather
       dockerfile: Dockerfile
-    container_name: collector_weather
+    container_name: desafioGDASH_collector_weather
     depends_on:
       - rabbitmq
     env_file: .env
@@ -37,7 +37,7 @@ services:
     build:
       context: ./worker-weather
       dockerfile: Dockerfile
-    container_name: worker_weather
+    container_name: desafioGDASH_worker_weather
     depends_on:
       - rabbitmq
       - mongodb # quando for usar mongo cai precisar
@@ -45,6 +45,18 @@ services:
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
+
+  backend:
+    build:
+      context: ./backend-api
+      dockerfile: dockerfile
+    container_name: desafioGDASH_backend
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - MONGO_URI=mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@desafiogdash.p6dv8be.mongodb.net/?appName=desafioGDASH
 
 volumes:
   mongodb_data:

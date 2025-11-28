@@ -1,21 +1,28 @@
 package main
+
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const API_URL = "http://backend:3000/weather"
+
 type WeatherData struct {
-	City        string  `json:"city"`
-	Temp        float64 `json:"temp"`
-	FeelsLike   float64 `json:"feels_like"`
-	Humidity    int     `json:"humidity"`
-	Description string  `json:"description"`
-	Timestamp   int64   `json:"timestamp"`
+	City        string  	`json:"city"`
+	Temp        float64 	`json:"temp"`
+	FeelsLike   float64 	`json:"feels_like"`
+	Humidity    int     	`json:"humidity"`
+	Description string  	`json:"description"`
+	Timestamp   int64   	`json:"collected_at"` 
+    Pressure    float64 `json:"pressure,omitempty"`
+    WindSpeed   float64 `json:"wind_speed,omitempty"`
 }
 
 func getEnv(key, fallback string) string {
@@ -25,7 +32,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func onError(err error, msg string) {
+func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
 	}
@@ -38,10 +45,30 @@ func connectRabbitMQ(connString string) *amqp.Connection {
 		if err == nil {
 			return conn
 		}
-
 		counts++
 		log.Printf("⚠️ RabbitMQ não pronto... Tentativa #%d", counts)
 		time.Sleep(5 * time.Second)
+	}
+}
+
+func sendToAPI(data WeatherData) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Printf("❌ Erro JSON: %v", err)
+		return
+	}
+
+	resp, err := http.Post(API_URL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Printf("❌ Erro API (%s): %v", API_URL, err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		log.Printf("✅ [API] Dados salvos com sucesso! (%s)", data.City)
+	} else {
+		log.Printf("⚠️ [API] Erro: NestJS retornou %d", resp.StatusCode)
 	}
 }
 
@@ -57,35 +84,20 @@ func main() {
 
 	conn := connectRabbitMQ(connString)
 	defer conn.Close()
-	log.Println("✅ Conectado ao RabbitMQ com sucesso!")
+	log.Println("✅ Conectado ao RabbitMQ!")
 
 	ch, err := conn.Channel()
-	onError(err, "Falha ao abrir canal")
+	failOnError(err, "Falha ao abrir canal")
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"weather_data", // nome
-		true,           // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
-	)
-	onError(err, "Falha ao declarar fila")
+	q, err := ch.QueueDeclare("weather_data", true, false, false, false, nil)
+	failOnError(err, "Falha ao declarar fila")
 
 	err = ch.Qos(1, 0, false)
-	onError(err, "Falha ao configurar QoS")
+	failOnError(err, "QoS falhou")
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	onError(err, "Falha ao registrar consumidor")
+	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	failOnError(err, "Consume falhou")
 
 	forever := make(chan struct{})
 
@@ -95,13 +107,18 @@ func main() {
 			
 			err := json.Unmarshal(d.Body, &data)
 			if err != nil {
-				log.Printf("JSON Inválido: %s", err)
+				log.Printf("❌ JSON Inválido: %s", err)
 				continue
 			}
-			log.Printf("📥 [Recebido] %s | %.1f°C | %s", data.City, data.Temp, data.Description)
+
+	
+			log.Printf("📥 [Fila] Processando: %s | %.1f°C", data.City, data.Temp)
+			
+	
+			sendToAPI(data)
 		}
 	}()
 
-	log.Printf(" [*] Aguardando mensagens na fila '%s'. CTRL+C para sair.", q.Name)
+	log.Printf(" [*] Worker rodando. Destino API: %s", API_URL)
 	<-forever
 }

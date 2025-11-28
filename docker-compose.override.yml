@@ -1,14 +1,13 @@
 services:
-  # Expondo portas
-  rabbitmq:
-    ports:
-      - "${RABBITMQ_PORT}:5672"
-      - "${RABBITMQ_UI_PORT}:15672"
+  # Nome do serviço deve ser igual ao do docker-compose.yml base
+  weather-collector:
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
       - ./collector-weather:/app
-      - ./worker-weather:/app
 
-  mongodb:
+  backend:
+    command: npm run start:dev
     ports:
-      - "${MONGO_PORT}:27017"
+      - "3000:3000"
+    volumes:
+      - ./backend-api:/app
+      - /app/node_modules
