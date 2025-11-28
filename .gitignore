@@ -1,0 +1,12 @@
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Node.js / NestJS
+**/node_modules/
+dist/
+npm-debug.log
+
+# Logs e Dados
+*.log
+.env
