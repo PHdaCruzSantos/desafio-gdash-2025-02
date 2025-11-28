@@ -25,6 +25,25 @@ let WeatherController = class WeatherController {
     create(createWeatherDto) {
         return this.weatherService.create(createWeatherDto);
     }
+    async exportCsv(res) {
+        try {
+            const csvData = await this.weatherService.generateCSV();
+            if (!csvData) {
+                return res.status(401).json({ message: 'CTLR: CSV Error' });
+            }
+            res.set({
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename="clima_exports.csv"',
+            });
+            res.send(csvData);
+        }
+        catch (erro) {
+            res.status(500).json({
+                message: 'Erro interno.',
+                error: erro instanceof Error ? erro.message : String(erro),
+            });
+        }
+    }
     findAll() {
         return this.weatherService.findAll();
     }
@@ -46,6 +65,13 @@ __decorate([
     __metadata("design:paramtypes", [create_weather_dto_1.CreateWeatherDto]),
     __metadata("design:returntype", void 0)
 ], WeatherController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('/export/csv'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WeatherController.prototype, "exportCsv", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),

@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { WeatherService } from './weather.service';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { UpdateWeatherDto } from './dto/update-weather.dto';
+import type { Response } from 'express';
 
 @Controller('weather')
 export class WeatherController {
@@ -19,6 +21,29 @@ export class WeatherController {
   create(@Body() createWeatherDto: CreateWeatherDto) {
     // Chama o service para salvar
     return this.weatherService.create(createWeatherDto);
+  }
+
+  @Get('/export/csv')
+  async exportCsv(@Res() res: Response) {
+    try {
+      const csvData = await this.weatherService.generateCSV();
+
+      if (!csvData) {
+        return res.status(401).json({ message: 'CTLR: CSV Error' });
+      }
+
+      res.set({
+        'Content-Type': 'text/csv',
+        'Content-Disposition': 'attachment; filename="clima_exports.csv"',
+      });
+
+      res.send(csvData);
+    } catch (erro) {
+      res.status(500).json({
+        message: 'Erro interno.',
+        error: erro instanceof Error ? erro.message : String(erro),
+      });
+    }
   }
 
   @Get()

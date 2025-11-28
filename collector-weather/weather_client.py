@@ -35,6 +35,6 @@ def process_data(data):
         "sunrise": data["sys"]["sunrise"],
         "sunset": data["sys"]["sunset"],
         "rain_1h": rain_volume,
-        "timestamp": int(time.time())
+        "collected_at": int(time.time())
     }
     return weather

@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const weather_entity_1 = require("./entities/weather.entity");
+const json2csv_1 = require("json2csv");
 let WeatherService = class WeatherService {
     weatherModel;
     constructor(weatherModel) {
@@ -37,6 +38,33 @@ let WeatherService = class WeatherService {
     }
     remove(id) {
         return `This action removes a #${id} weather`;
+    }
+    async generateCSV() {
+        const logs = await this.weatherModel
+            .find()
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean()
+            .exec();
+        if (!logs || logs.length === 0)
+            return '';
+        const fields = [
+            { label: 'Cidade', value: 'city' },
+            { label: 'Temperatura (°C)', value: 'temp' },
+            { label: 'Sensação (°C)', value: 'feels_like' },
+            { label: 'Umildade (%)', value: 'humidity' },
+            { label: 'Condição', value: 'description' },
+            {
+                label: 'Coletado em',
+                value: (row) => row.collected_at
+                    ? new Date(row.collected_at * 1000).toLocaleString('pt-BR')
+                    : '',
+            },
+        ];
+        console.table(fields);
+        const json2csvParser = new json2csv_1.Parser({ fields });
+        const csv = json2csvParser.parse(logs);
+        return csv;
     }
 };
 exports.WeatherService = WeatherService;

@@ -57,7 +57,6 @@ func sendToAPI(data WeatherData) {
 		log.Printf("❌ Erro JSON: %v", err)
 		return
 	}
-
 	resp, err := http.Post(API_URL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Printf("❌ Erro API (%s): %v", API_URL, err)
@@ -66,7 +65,7 @@ func sendToAPI(data WeatherData) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-		log.Printf("✅ [API] Dados salvos com sucesso! (%s)", data.City)
+		log.Printf("✅ [API] Dados salvos com sucesso! (%s - %d) ", data.City, data.Timestamp)
 	} else {
 		log.Printf("⚠️ [API] Erro: NestJS retornou %d", resp.StatusCode)
 	}
@@ -112,7 +111,7 @@ func main() {
 			}
 
 	
-			log.Printf("📥 [Fila] Processando: %s | %.1f°C", data.City, data.Temp)
+			log.Printf("📥 [Fila] Processando: (%s)", data.City)
 			
 	
 			sendToAPI(data)
