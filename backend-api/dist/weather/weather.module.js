@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const weather_service_1 = require("./weather.service");
 const weather_controller_1 = require("./weather.controller");
 const weather_entity_1 = require("./entities/weather.entity");
+const insight_service_1 = require("./insight.service");
 let WeatherModule = class WeatherModule {
 };
 exports.WeatherModule = WeatherModule;
@@ -23,7 +24,7 @@ exports.WeatherModule = WeatherModule = __decorate([
             ]),
         ],
         controllers: [weather_controller_1.WeatherController],
-        providers: [weather_service_1.WeatherService],
+        providers: [weather_service_1.WeatherService, insight_service_1.InsightService],
     })
 ], WeatherModule);
 //# sourceMappingURL=weather.module.js.map

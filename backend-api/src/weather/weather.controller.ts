@@ -19,7 +19,6 @@ export class WeatherController {
 
   @Post()
   create(@Body() createWeatherDto: CreateWeatherDto) {
-    // Chama o service para salvar
     return this.weatherService.create(createWeatherDto);
   }
 

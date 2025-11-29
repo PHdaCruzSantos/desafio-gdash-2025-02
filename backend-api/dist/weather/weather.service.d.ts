@@ -1,9 +1,12 @@
 import { Model } from 'mongoose';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { WeatherLog } from './entities/weather.entity';
+import { InsightService } from './insight.service';
 export declare class WeatherService {
     private weatherModel;
-    constructor(weatherModel: Model<WeatherLog>);
+    private insightService;
+    constructor(weatherModel: Model<WeatherLog>, insightService: InsightService);
+    private getHourlyHistory;
     create(createWeatherDto: CreateWeatherDto): Promise<import("mongoose").Document<unknown, {}, WeatherLog, {}, {}> & WeatherLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {
@@ -14,8 +17,8 @@ export declare class WeatherService {
     } & {
         __v: number;
     })[]>;
+    generateCSV(): Promise<any>;
     findOne(id: number): string;
     update(id: number, updateWeatherDto: any): string;
     remove(id: number): string;
-    generateCSV(): Promise<any>;
 }
