@@ -18,6 +18,7 @@ const weather_service_1 = require("./weather.service");
 const create_weather_dto_1 = require("./dto/create-weather.dto");
 const update_weather_dto_1 = require("./dto/update-weather.dto");
 const export_service_1 = require("./export.service");
+const swagger_1 = require("@nestjs/swagger");
 let WeatherController = class WeatherController {
     weatherService;
     exportService;
@@ -90,6 +91,8 @@ let WeatherController = class WeatherController {
 };
 exports.WeatherController = WeatherController;
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Recebe dados do Worker e salva no banco' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Log climático criado com sucesso.' }),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -112,6 +115,7 @@ __decorate([
 ], WeatherController.prototype, "exportXlsx", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Lista os últimos 100 registros' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -139,6 +143,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WeatherController.prototype, "remove", null);
 exports.WeatherController = WeatherController = __decorate([
+    (0, swagger_1.ApiTags)('weather'),
     (0, common_1.Controller)('weather'),
     __metadata("design:paramtypes", [weather_service_1.WeatherService,
         export_service_1.ExportService])

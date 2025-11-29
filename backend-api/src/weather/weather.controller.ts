@@ -13,7 +13,9 @@ import { CreateWeatherDto } from './dto/create-weather.dto';
 import { UpdateWeatherDto } from './dto/update-weather.dto';
 import type { Response } from 'express';
 import { ExportService } from './export.service';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('weather')
 @Controller('weather')
 export class WeatherController {
   constructor(
@@ -21,12 +23,15 @@ export class WeatherController {
     private readonly exportService: ExportService,
   ) {}
 
+  @ApiOperation({ summary: 'Recebe dados do Worker e salva no banco' })
+  @ApiResponse({ status: 201, description: 'Log climático criado com sucesso.' })
   @Post()
   create(@Body() createWeatherDto: CreateWeatherDto) {
     return this.weatherService.create(createWeatherDto);
   }
 
   @Get('export/csv')
+
   async exportCsv(@Res() res: Response) {
     try {
       const data = await this.weatherService.findAllForExport();
@@ -77,6 +82,7 @@ export class WeatherController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Lista os últimos 100 registros' })
   findAll() {
     return this.weatherService.findAll();
   }
