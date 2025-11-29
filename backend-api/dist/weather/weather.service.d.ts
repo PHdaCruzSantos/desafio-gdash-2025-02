@@ -17,7 +17,20 @@ export declare class WeatherService {
     } & {
         __v: number;
     })[]>;
-    generateCSV(): Promise<any>;
+    findAllForExport(): Promise<(import("mongoose").FlattenMaps<{
+        city: string;
+        temp: number;
+        feels_like: number;
+        humidity: number;
+        pressure: number;
+        description: string;
+        wind_speed: number;
+        collected_at: number;
+    }> & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    })[]>;
     findOne(id: number): string;
     update(id: number, updateWeatherDto: any): string;
     remove(id: number): string;

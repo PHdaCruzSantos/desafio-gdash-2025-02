@@ -63,19 +63,13 @@ export class WeatherService {
     return this.weatherModel.find().sort({ createdAt: -1 }).limit(100).exec();
   }
   
-  async generateCSV() {
-    const logs = await this.weatherModel.find().sort({ createdAt: -1 }).limit(100).lean().exec();
-    if (!logs || logs.length === 0) return '';
-    const fields = [
-        { label: 'Cidade', value: 'city' },
-        { label: 'Temp (C)', value: 'temp' },
-        { label: 'Data', value: (row: any) => row.collected_at ? new Date(row.collected_at * 1000).toLocaleString('pt-BR') : '' },
-        { label: 'Análise IA', value: 'ai_insight' }
-    ];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const json2csvParser = new Parser({ fields });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    return json2csvParser.parse(logs);
+  async findAllForExport() {
+    return this.weatherModel
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean()
+      .exec();
   }
 
   findOne(id: number) { return `This action returns a #${id} weather`; }

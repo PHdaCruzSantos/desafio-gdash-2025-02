@@ -12,31 +12,62 @@ import { WeatherService } from './weather.service';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { UpdateWeatherDto } from './dto/update-weather.dto';
 import type { Response } from 'express';
+import { ExportService } from './export.service';
 
 @Controller('weather')
 export class WeatherController {
-  constructor(private readonly weatherService: WeatherService) {}
+  constructor(
+    private readonly weatherService: WeatherService,
+    private readonly exportService: ExportService,
+  ) {}
 
   @Post()
   create(@Body() createWeatherDto: CreateWeatherDto) {
     return this.weatherService.create(createWeatherDto);
   }
 
-  @Get('/export/csv')
+  @Get('export/csv')
   async exportCsv(@Res() res: Response) {
     try {
-      const csvData = await this.weatherService.generateCSV();
-
+      const data = await this.weatherService.findAllForExport();
+      if (!data) {
+        return res.status(401).json({ message: 'CTLR: sem dados' });
+      }
+      const csvData = await this.exportService.generateCsv(data)
       if (!csvData) {
-        return res.status(401).json({ message: 'CTLR: CSV Error' });
+        return res.status(401).json({ message: 'CTLR: CSV Error na conversão' });
       }
 
       res.set({
         'Content-Type': 'text/csv',
         'Content-Disposition': 'attachment; filename="clima_exports.csv"',
       });
-
       res.send(csvData);
+    } catch (erro) {
+      res.status(500).json({
+        message: 'Erro interno.',
+        error: erro instanceof Error ? erro.message : String(erro),
+      });
+    }
+  }
+  @Get('export/xlsx')
+  async exportXlsx(@Res() res: Response) {
+    try {
+      const data = await this.weatherService.findAllForExport();
+      if (!data) {
+        return res.status(401).json({ message: 'CTLR: sem dados' });
+      }
+      const bufferExcel = await this.exportService.generateXlsx(data)
+      if (!bufferExcel) {
+        return res.status(401).json({ message: 'CTLR: CSV Error na conversão' });
+      }
+
+      res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="clima_exports.xlsx"',
+      'Content-Length': bufferExcel.byteLength.toString(),
+    });
+      res.send(bufferExcel);
     } catch (erro) {
       res.status(500).json({
         message: 'Erro interno.',

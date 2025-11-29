@@ -4,6 +4,7 @@ import { WeatherService } from './weather.service';
 import { WeatherController } from './weather.controller';
 import { WeatherLog, WeatherLogSchema } from './entities/weather.entity';
 import { InsightService } from './insight.service';
+import { ExportService } from './export.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { InsightService } from './insight.service';
     ]),
   ],
   controllers: [WeatherController],
-  providers: [WeatherService, InsightService],
+  providers: [WeatherService, InsightService, ExportService],
 })
 export class WeatherModule {}

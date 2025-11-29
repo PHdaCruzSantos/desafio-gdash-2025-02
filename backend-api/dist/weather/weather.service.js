@@ -17,7 +17,6 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const weather_entity_1 = require("./entities/weather.entity");
-const json2csv_1 = require("json2csv");
 const insight_service_1 = require("./insight.service");
 let WeatherService = class WeatherService {
     weatherModel;
@@ -61,18 +60,13 @@ let WeatherService = class WeatherService {
     async findAll() {
         return this.weatherModel.find().sort({ createdAt: -1 }).limit(100).exec();
     }
-    async generateCSV() {
-        const logs = await this.weatherModel.find().sort({ createdAt: -1 }).limit(100).lean().exec();
-        if (!logs || logs.length === 0)
-            return '';
-        const fields = [
-            { label: 'Cidade', value: 'city' },
-            { label: 'Temp (C)', value: 'temp' },
-            { label: 'Data', value: (row) => row.collected_at ? new Date(row.collected_at * 1000).toLocaleString('pt-BR') : '' },
-            { label: 'Análise IA', value: 'ai_insight' }
-        ];
-        const json2csvParser = new json2csv_1.Parser({ fields });
-        return json2csvParser.parse(logs);
+    async findAllForExport() {
+        return this.weatherModel
+            .find()
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean()
+            .exec();
     }
     findOne(id) { return `This action returns a #${id} weather`; }
     update(id, updateWeatherDto) { return `This action updates a #${id} weather`; }

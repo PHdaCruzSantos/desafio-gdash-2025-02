@@ -17,25 +17,56 @@ const common_1 = require("@nestjs/common");
 const weather_service_1 = require("./weather.service");
 const create_weather_dto_1 = require("./dto/create-weather.dto");
 const update_weather_dto_1 = require("./dto/update-weather.dto");
+const export_service_1 = require("./export.service");
 let WeatherController = class WeatherController {
     weatherService;
-    constructor(weatherService) {
+    exportService;
+    constructor(weatherService, exportService) {
         this.weatherService = weatherService;
+        this.exportService = exportService;
     }
     create(createWeatherDto) {
         return this.weatherService.create(createWeatherDto);
     }
     async exportCsv(res) {
         try {
-            const csvData = await this.weatherService.generateCSV();
+            const data = await this.weatherService.findAllForExport();
+            if (!data) {
+                return res.status(401).json({ message: 'CTLR: sem dados' });
+            }
+            const csvData = await this.exportService.generateCsv(data);
             if (!csvData) {
-                return res.status(401).json({ message: 'CTLR: CSV Error' });
+                return res.status(401).json({ message: 'CTLR: CSV Error na conversão' });
             }
             res.set({
                 'Content-Type': 'text/csv',
                 'Content-Disposition': 'attachment; filename="clima_exports.csv"',
             });
             res.send(csvData);
+        }
+        catch (erro) {
+            res.status(500).json({
+                message: 'Erro interno.',
+                error: erro instanceof Error ? erro.message : String(erro),
+            });
+        }
+    }
+    async exportXlsx(res) {
+        try {
+            const data = await this.weatherService.findAllForExport();
+            if (!data) {
+                return res.status(401).json({ message: 'CTLR: sem dados' });
+            }
+            const bufferExcel = await this.exportService.generateXlsx(data);
+            if (!bufferExcel) {
+                return res.status(401).json({ message: 'CTLR: CSV Error na conversão' });
+            }
+            res.set({
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': 'attachment; filename="clima_exports.xlsx"',
+                'Content-Length': bufferExcel.byteLength.toString(),
+            });
+            res.send(bufferExcel);
         }
         catch (erro) {
             res.status(500).json({
@@ -66,12 +97,19 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WeatherController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('/export/csv'),
+    (0, common_1.Get)('export/csv'),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WeatherController.prototype, "exportCsv", null);
+__decorate([
+    (0, common_1.Get)('export/xlsx'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WeatherController.prototype, "exportXlsx", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
@@ -102,6 +140,7 @@ __decorate([
 ], WeatherController.prototype, "remove", null);
 exports.WeatherController = WeatherController = __decorate([
     (0, common_1.Controller)('weather'),
-    __metadata("design:paramtypes", [weather_service_1.WeatherService])
+    __metadata("design:paramtypes", [weather_service_1.WeatherService,
+        export_service_1.ExportService])
 ], WeatherController);
 //# sourceMappingURL=weather.controller.js.map
