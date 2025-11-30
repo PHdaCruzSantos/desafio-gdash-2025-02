@@ -11,3 +11,10 @@ services:
     volumes:
       - ./backend-api:/app
       - /app/node_modules
+  
+  frontend:
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

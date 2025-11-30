@@ -57,6 +57,14 @@ services:
       - .env
     environment:
       - MONGO_URI=mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@desafiogdash.p6dv8be.mongodb.net/?appName=desafioGDASH
+      
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: desafioGDASH_frontend
+    depends_on:
+      - backend
 
 volumes:
   mongodb_data:
