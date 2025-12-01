@@ -35,3 +35,39 @@ export const WeatherService = {
     window.open('http://localhost:3000/weather/export/xlsx', '_blank');
   }
 };
+
+export interface PokemonListResponse {
+  data: { name: string; url: string }[];
+  total: number;
+  totalPages: number;
+}
+
+export interface PokemonDetails {
+  id: number;
+  name: string;
+  types: { type: { name: string } }[];
+  sprites: {
+    other: {
+      "official-artwork": {
+        front_default: string;
+      };
+    };
+  };
+  stats: { base_stat: number; stat: { name: string } }[];
+}
+
+export const PokemonService = {
+  // Busca a lista paginada
+  getAll: async (page = 1, limit = 12): Promise<PokemonListResponse> => {
+    const response = await api.get<PokemonListResponse>('/pokemon', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
+  // Busca detalhes de UM pokémon pelo nome ou ID
+  getDetails: async (idOrName: string | number): Promise<PokemonDetails> => {
+    const response = await api.get<PokemonDetails>(`/pokemon/${idOrName}`);
+    return response.data;
+  },
+};

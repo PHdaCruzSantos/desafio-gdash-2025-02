@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const weather_module_1 = require("./weather/weather.module");
+const pokemon_module_1 = require("./pokemon/pokemon.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -20,6 +21,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forRoot(process.env.MONGO_URI),
             weather_module_1.WeatherModule,
+            pokemon_module_1.PokemonModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
