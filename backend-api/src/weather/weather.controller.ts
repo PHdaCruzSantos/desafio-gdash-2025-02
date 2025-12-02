@@ -14,6 +14,7 @@ import { UpdateWeatherDto } from './dto/update-weather.dto';
 import type { Response } from 'express';
 import { ExportService } from './export.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AnalysisRequestDto } from './dto/analysis-request.dto';
 
 @ApiTags('weather')
 @Controller('weather')
@@ -79,6 +80,12 @@ export class WeatherController {
         error: erro instanceof Error ? erro.message : String(erro),
       });
     }
+  }
+
+  @Post('analysis') // POST /weather/analysis
+  @ApiOperation({ summary: 'Gera um insight de IA sob demanda' })
+  async generateAnalysis(@Body() dto: AnalysisRequestDto) {
+    return this.weatherService.requestAnalysis(dto);
   }
 
   @Get()

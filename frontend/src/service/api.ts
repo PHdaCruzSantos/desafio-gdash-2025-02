@@ -20,6 +20,15 @@ export interface WeatherLog {
   createdAt: string;    // Data ISO do Mongo
 }
 
+export const AnalysisContext = {
+  GENERAL: 'general',
+  HEALTH: 'health',
+  ACTIVITY: 'activity',
+  OUTFIT: 'outfit',
+} as const;
+
+export type AnalysisContext = (typeof AnalysisContext)[keyof typeof AnalysisContext];
+
 // Serviço dedicado ao Clima (Organização)
 export const WeatherService = {
   getAll: async (): Promise<WeatherLog[]> => {
@@ -33,6 +42,11 @@ export const WeatherService = {
   
   exportXlsx: () => {
     window.open('http://localhost:3000/weather/export/xlsx', '_blank');
+  },
+  getAnalysis: async (context: AnalysisContext, city?: string) => {
+    // Retorna { insight: "Texto...", context: "health", generated_at: "..." }
+    const response = await api.post('/weather/analysis', { context, city });
+    return response.data;
   }
 };
 

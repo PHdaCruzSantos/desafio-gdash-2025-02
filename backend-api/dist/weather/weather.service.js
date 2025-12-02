@@ -25,6 +25,21 @@ let WeatherService = class WeatherService {
         this.weatherModel = weatherModel;
         this.insightService = insightService;
     }
+    async requestAnalysis(dto) {
+        const latestLog = await this.weatherModel.findOne().sort({ createdAt: -1 }).lean().exec();
+        if (!latestLog) {
+            return { insight: "Sem dados suficientes para análise." };
+        }
+        const cityName = dto.city || latestLog.city;
+        const historyText = await this.getHourlyHistory(cityName);
+        const currentText = `Temp: ${latestLog.temp}°C | Umid: ${latestLog.humidity}% | ${latestLog.description}`;
+        const insight = await this.insightService.generateAnalysis(cityName, currentText, historyText, dto.context);
+        return {
+            insight,
+            context: dto.context,
+            generated_at: new Date()
+        };
+    }
     async getHourlyHistory(city) {
         const historyPoints = [];
         const now = Math.floor(Date.now() / 1000);
@@ -47,14 +62,7 @@ let WeatherService = class WeatherService {
         return historyPoints.join('\n');
     }
     async create(createWeatherDto) {
-        const historyText = await this.getHourlyHistory(createWeatherDto.city);
-        const currentText = `Temp: ${createWeatherDto.temp}°C | Sensação: ${createWeatherDto.feels_like}°C | Umid: ${createWeatherDto.humidity}% | ${createWeatherDto.description}`;
-        const insight = await this.insightService.generateWeatherAnalysis(createWeatherDto.city, currentText, historyText);
-        const dataToSave = {
-            ...createWeatherDto,
-            ai_insight: insight,
-        };
-        const createdLog = new this.weatherModel(dataToSave);
+        const createdLog = new this.weatherModel(createWeatherDto);
         return createdLog.save();
     }
     async findAll() {

@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { WeatherLog } from './entities/weather.entity';
-import { Parser } from 'json2csv';
 import { InsightService } from './insight.service';
+import {AnalysisRequestDto, AnalysisContext} from "./dto/analysis-request.dto"
 
 @Injectable()
 export class WeatherService {
@@ -12,6 +12,31 @@ export class WeatherService {
     @InjectModel(WeatherLog.name) private weatherModel: Model<WeatherLog>,
     private insightService: InsightService,
   ) {}
+
+  async requestAnalysis(dto: AnalysisRequestDto) {
+    const latestLog = await this.weatherModel.findOne().sort({ createdAt: -1 }).lean().exec();
+    
+    if (!latestLog) {
+      return { insight: "Sem dados suficientes para análise." };
+    }
+
+    const cityName = dto.city || latestLog.city;
+    const historyText = await this.getHourlyHistory(cityName);
+    const currentText = `Temp: ${latestLog.temp}°C | Umid: ${latestLog.humidity}% | ${latestLog.description}`;
+
+    const insight = await this.insightService.generateAnalysis(
+      cityName,
+      currentText,
+      historyText,
+      dto.context
+    );
+
+    return { 
+      insight, 
+      context: dto.context, 
+      generated_at: new Date() 
+    };
+  }
 
   private async getHourlyHistory(city: string): Promise<string> {
     
@@ -40,22 +65,7 @@ export class WeatherService {
   }
 
   async create(createWeatherDto: CreateWeatherDto) {
-    const historyText = await this.getHourlyHistory(createWeatherDto.city);
-    const currentText = `Temp: ${createWeatherDto.temp}°C | Sensação: ${createWeatherDto.feels_like}°C | Umid: ${createWeatherDto.humidity}% | ${createWeatherDto.description}`;
-
-
-    const insight = await this.insightService.generateWeatherAnalysis(
-      createWeatherDto.city,
-      currentText,
-      historyText
-    );
-
-    const dataToSave = {
-      ...createWeatherDto,
-      ai_insight: insight,
-    };
-
-    const createdLog = new this.weatherModel(dataToSave);
+    const createdLog = new this.weatherModel(createWeatherDto);
     return createdLog.save();
   }
 

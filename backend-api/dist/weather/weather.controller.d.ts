@@ -3,6 +3,7 @@ import { CreateWeatherDto } from './dto/create-weather.dto';
 import { UpdateWeatherDto } from './dto/update-weather.dto';
 import type { Response } from 'express';
 import { ExportService } from './export.service';
+import { AnalysisRequestDto } from './dto/analysis-request.dto';
 export declare class WeatherController {
     private readonly weatherService;
     private readonly exportService;
@@ -14,6 +15,15 @@ export declare class WeatherController {
     }>;
     exportCsv(res: Response): Promise<Response<any, Record<string, any>> | undefined>;
     exportXlsx(res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    generateAnalysis(dto: AnalysisRequestDto): Promise<{
+        insight: string;
+        context?: undefined;
+        generated_at?: undefined;
+    } | {
+        insight: string;
+        context: import("./dto/analysis-request.dto").AnalysisContext;
+        generated_at: Date;
+    }>;
     findAll(): Promise<(import("mongoose").Document<unknown, {}, import("./entities/weather.entity").WeatherLog, {}, {}> & import("./entities/weather.entity").WeatherLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {

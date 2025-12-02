@@ -45,7 +45,7 @@ export function DashboardPage() {
 
       <div className="grid gap-6">
         {/* IA em destaque no topo */}
-        <AiInsightCard insight={current?.ai_insight} />
+        <AiInsightCard  />
         
         {/* Cards de Métricas */}
         <CurrentWeather data={current} />

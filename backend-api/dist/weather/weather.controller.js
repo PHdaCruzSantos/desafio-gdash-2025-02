@@ -19,6 +19,7 @@ const create_weather_dto_1 = require("./dto/create-weather.dto");
 const update_weather_dto_1 = require("./dto/update-weather.dto");
 const export_service_1 = require("./export.service");
 const swagger_1 = require("@nestjs/swagger");
+const analysis_request_dto_1 = require("./dto/analysis-request.dto");
 let WeatherController = class WeatherController {
     weatherService;
     exportService;
@@ -76,6 +77,9 @@ let WeatherController = class WeatherController {
             });
         }
     }
+    async generateAnalysis(dto) {
+        return this.weatherService.requestAnalysis(dto);
+    }
     findAll() {
         return this.weatherService.findAll();
     }
@@ -113,6 +117,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WeatherController.prototype, "exportXlsx", null);
+__decorate([
+    (0, common_1.Post)('analysis'),
+    (0, swagger_1.ApiOperation)({ summary: 'Gera um insight de IA sob demanda' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [analysis_request_dto_1.AnalysisRequestDto]),
+    __metadata("design:returntype", Promise)
+], WeatherController.prototype, "generateAnalysis", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lista os últimos 100 registros' }),

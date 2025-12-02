@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Parser } from 'json2csv';
 import * as ExcelJS from 'exceljs';
-import { WeatherLog } from './entities/weather.entity';
 
 @Injectable()
 export class ExportService {
@@ -22,7 +21,6 @@ export class ExportService {
             ? new Date(row.collected_at * 1000).toLocaleString('pt-BR')
             : '',
       },
-      { label: 'Análise IA', value: 'ai_insight' },
     ];
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
@@ -42,7 +40,6 @@ export class ExportService {
       { header: 'Umid. (%)', key: 'humidity', width: 10 },
       { header: 'Condição', key: 'description', width: 20 },
       { header: 'Data Coleta', key: 'collected_at', width: 20 },
-      { header: 'Análise IA', key: 'ai_insight', width: 50 },
     ];
 
     const headerRow = worksheet.getRow(1);
@@ -64,7 +61,6 @@ export class ExportService {
         collected_at: log.collected_at
           ? new Date(log.collected_at * 1000).toLocaleString('pt-BR')
           : '',
-        ai_insight: log.ai_insight || 'N/A',
       });
     });
 
