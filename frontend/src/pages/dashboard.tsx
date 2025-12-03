@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/dashboard/header"
 import { CurrentWeather } from "@/components/dashboard/current-weather"
 import { AiInsightCard } from "@/components/dashboard/ai-insight"
 import { HistoryTable } from "@/components/dashboard/history-table"
+import { ChartsGrid } from "@/components/dashboard/chart-grid"
 
 export function DashboardPage() {
   const [logs, setLogs] = useState<WeatherLog[]>([])
@@ -50,8 +51,17 @@ export function DashboardPage() {
         {/* Cards de Métricas */}
         <CurrentWeather data={current} />
         
-        {/* Tabela Paginada */}
-        <HistoryTable data={logs} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Gráfico ocupa 4 colunas */}
+          <div className="lg:col-span-12">
+            <ChartsGrid data={logs} />
+          </div>
+
+          {/* Tabela ocupa 3 colunas (fica mais compacta) */}
+          <div className="lg:col-span-12">
+            <HistoryTable data={logs} />
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -82,7 +82,7 @@ export class WeatherController {
     }
   }
 
-  @Post('analysis') // POST /weather/analysis
+  @Post('analysis') 
   @ApiOperation({ summary: 'Gera um insight de IA sob demanda' })
   async generateAnalysis(@Body() dto: AnalysisRequestDto) {
     return this.weatherService.requestAnalysis(dto);

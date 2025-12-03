@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { WeatherLog } from './entities/weather.entity';
 import { InsightService } from './insight.service';
-import {AnalysisRequestDto, AnalysisContext} from "./dto/analysis-request.dto"
+import {AnalysisRequestDto} from "./dto/analysis-request.dto"
 
 @Injectable()
 export class WeatherService {

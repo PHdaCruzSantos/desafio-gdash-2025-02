@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose'; // <--- Importante
+import { MongooseModule } from '@nestjs/mongoose'; 
 import { WeatherService } from './weather.service';
 import { WeatherController } from './weather.controller';
 import { WeatherLog, WeatherLogSchema } from './entities/weather.entity';
@@ -8,7 +8,6 @@ import { ExportService } from './export.service';
 
 @Module({
   imports: [
-    // Registra o Schema neste módulo
     MongooseModule.forFeature([
       { name: WeatherLog.name, schema: WeatherLogSchema },
     ]),

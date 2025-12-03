@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { CreateWeatherDto } from './dto/create-weather.dto';
 import { WeatherLog } from './entities/weather.entity';
 import { InsightService } from './insight.service';
-import { AnalysisRequestDto, AnalysisContext } from "./dto/analysis-request.dto";
+import { AnalysisRequestDto } from "./dto/analysis-request.dto";
 export declare class WeatherService {
     private weatherModel;
     private insightService;
@@ -13,7 +13,7 @@ export declare class WeatherService {
         generated_at?: undefined;
     } | {
         insight: string;
-        context: AnalysisContext;
+        context: import("./dto/analysis-request.dto").AnalysisContext;
         generated_at: Date;
     }>;
     private getHourlyHistory;

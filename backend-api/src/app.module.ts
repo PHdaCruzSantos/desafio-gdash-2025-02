@@ -7,7 +7,6 @@ import { PokemonModule } from './pokemon/pokemon.module';
 
 @Module({
   imports: [
-    // Conecta usando a variável de ambiente definida no docker-compose
     MongooseModule.forRoot(process.env.MONGO_URI!),
     WeatherModule,
     PokemonModule,

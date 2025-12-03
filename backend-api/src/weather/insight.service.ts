@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AnalysisContext } from './dto/analysis-request.dto'; // Importe o Enum
+import { AnalysisContext } from './dto/analysis-request.dto'; 
 
 @Injectable()
 export class InsightService {
@@ -20,7 +20,6 @@ export class InsightService {
     try {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
-      // Seleciona a persona baseada no contexto
       let personaInstruction = "Aja como um meteorologista.";
       if (context === AnalysisContext.HEALTH) personaInstruction = "Aja como um consultor de saúde focado em clima.";
       if (context === AnalysisContext.OUTFIT) personaInstruction = "Aja como um consultor de moda focado em clima.";
