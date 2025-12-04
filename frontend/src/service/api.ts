@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000',
-  timeout: 5000,  //5s, cancela
+  timeout: 5000,  
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,8 +16,8 @@ export interface WeatherLog {
   humidity: number;
   description: string;
   ai_insight?: string;
-  collected_at: number; // Timestamp Unix
-  createdAt: string;    // Data ISO do Mongo
+  collected_at: number; 
+  createdAt: string;    
 }
 
 export const AnalysisContext = {
@@ -29,7 +29,56 @@ export const AnalysisContext = {
 
 export type AnalysisContext = (typeof AnalysisContext)[keyof typeof AnalysisContext];
 
-// Serviço dedicado ao Clima (Organização)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('gdash_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const AuthService = {
+  login: async (email: string, password: string) => {
+    const response = await api.post('/auth/login', { email, password });
+    return response.data; // { access_token, user }
+  },
+  register: async (name: string, email: string, password: string) => {
+    const response = await api.post('/users', { name, email, password });
+    return response.data;
+  },
+};
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  description?: string;
+  photo?: string;
+}
+
+export const UserService = {
+  getAll: async (): Promise<User[]> => {
+    const response = await api.get<User[]>('/users');
+    return response.data;
+  },
+  create: async (data: { name: string; email: string; password: string }) => {
+    const response = await api.post('/users', data);
+    return response.data;
+  },
+  updateProfile: async (id: string, data: { name?: string; email?: string; password?: string }) => {
+    // Remove senha vazia se o usuário não preencheu
+    if (!data.password) delete data.password;
+    
+    const response = await api.patch(`/users/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    await api.delete(`/users/${id}`);
+  },
+};
+
+
 export const WeatherService = {
   getAll: async (): Promise<WeatherLog[]> => {
     const response = await api.get<WeatherLog[]>('/weather');
@@ -44,7 +93,6 @@ export const WeatherService = {
     window.open('http://localhost:3000/weather/export/xlsx', '_blank');
   },
   getAnalysis: async (context: AnalysisContext, city?: string) => {
-    // Retorna { insight: "Texto...", context: "health", generated_at: "..." }
     const response = await api.post('/weather/analysis', { context, city });
     return response.data;
   }

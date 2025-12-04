@@ -1,6 +1,7 @@
-import { Outlet } from "react-router-dom"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { Outlet } from "react-router-dom"
 
 export function MainLayout() {
   return (
@@ -15,6 +16,7 @@ export function MainLayout() {
             </div>
         </main>
       </div>
+      <Toaster />
     </ThemeProvider>
   )
 }
