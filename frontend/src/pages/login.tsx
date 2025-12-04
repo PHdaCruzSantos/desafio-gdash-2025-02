@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { CloudSun, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Schemas de Validação
 const loginSchema = z.object({
@@ -28,6 +29,8 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { toast } = useToast();
+
   const from = location.state?.from?.pathname || "/";
 
   const formLogin = useForm<z.infer<typeof loginSchema>>({
@@ -40,14 +43,25 @@ export function LoginPage() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
+  const showError = (message: string) => {
+    setError(message);
+    setTimeout(() => {
+      setError("");
+    }, 5000);
+  };
+
   async function onLogin(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     setError("");
     try {
       await login(values.email, values.password);
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Bem-vindo de volta ao GDASH Weather.",
+      })
       navigate(from, { replace: true });
     } catch (err) {
-      setError("Falha ao entrar. Verifique suas credenciais.");
+      showError("Falha ao entrar. Verifique suas credenciais.");
     } finally {
       setIsLoading(false);
     }
@@ -58,9 +72,13 @@ export function LoginPage() {
     setError("");
     try {
       await register(values.name, values.email, values.password);
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Você já pode acessar o sistema.",
+      })
       navigate(from, { replace: true });
     } catch (err) {
-      setError("Erro ao registrar. Email já pode estar em uso.");
+      showError("Erro ao registrar. Email já pode estar em uso.");
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +111,6 @@ export function LoginPage() {
               <TabsTrigger value="register">Cadastrar</TabsTrigger>
             </TabsList>
 
-            {/* ABA LOGIN */}
             <TabsContent value="login">
               <Form {...formLogin}>
                 <form onSubmit={formLogin.handleSubmit(onLogin)} className="space-y-4">
@@ -119,7 +136,7 @@ export function LoginPage() {
                       </FormItem>
                     )}
                   />
-                  {error && <p className="text-sm text-destructive text-center">{error}</p>}
+                  {error && <p className="text-sm text-destructive text-center animate-in fade-in slide-in-from-top-1">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Entrando..." : "Acessar Sistema"}
                   </Button>
@@ -164,7 +181,7 @@ export function LoginPage() {
                       </FormItem>
                     )}
                   />
-                  {error && <p className="text-sm text-destructive text-center">{error}</p>}
+                  {error && <p className="text-sm text-destructive text-center animate-in fade-in slide-in-from-top-1">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Criando conta..." : "Criar Conta"}
                   </Button>

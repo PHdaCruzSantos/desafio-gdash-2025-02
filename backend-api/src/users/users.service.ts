@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -52,9 +52,30 @@ export class UsersService {
     return updatedUser;
   }
 
-  async remove(id: string) {
-    const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
-    if (!deletedUser) throw new NotFoundException('Usuário não encontrado');
+  async updateAvatar(id: string, photo: string) {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, { photo }, { new: true })
+      .select('-password')
+      .exec();
+
+    if (!updatedUser) throw new NotFoundException('Usuário não encontrado');
+    return updatedUser;
+  }
+
+  async remove(id: string, password?: string) {
+    if (!password) {
+      throw new UnauthorizedException('Senha é obrigatória para excluir a conta');
+    }
+
+    const user = await this.userModel.findById(id).exec();
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Senha incorreta');
+    }
+
+    await this.userModel.findByIdAndDelete(id).exec();
     return { message: 'Usuário removido com sucesso' };
   }
 }

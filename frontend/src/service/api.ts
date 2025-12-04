@@ -40,7 +40,9 @@ api.interceptors.request.use((config) => {
 export const AuthService = {
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
-    return response.data; // { access_token, user }
+    console.log("User login")
+    console.table(response.data)
+    return response.data; 
   },
   register: async (name: string, email: string, password: string) => {
     const response = await api.post('/users', { name, email, password });
@@ -66,15 +68,24 @@ export const UserService = {
     const response = await api.post('/users', data);
     return response.data;
   },
-  updateProfile: async (id: string, data: { name?: string; email?: string; password?: string }) => {
-    // Remove senha vazia se o usuário não preencheu
+  updateProfile: async (id: string, data: { name?: string; email?: string; password?: string; description?: string }) => {
     if (!data.password) delete data.password;
     
     const response = await api.patch(`/users/${id}`, data);
     return response.data;
   },
-  delete: async (id: string) => {
-    await api.delete(`/users/${id}`);
+  uploadAvatar: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(`/users/${id}/avatar`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  delete: async (id: string, password?: string) => {
+    await api.delete(`/users/${id}`, { data: { password } });
   },
 };
 

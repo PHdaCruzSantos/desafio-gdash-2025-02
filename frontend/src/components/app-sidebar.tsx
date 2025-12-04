@@ -96,7 +96,15 @@ export function AppSidebar() {
           )}>
             <div className={cn("flex items-center gap-3", isCollapsed && !isMobile ? "justify-center" : "")}>
               <Avatar className="h-8 w-8 border border-primary/20">
-                <AvatarImage src="" />
+                <AvatarImage src={
+                (() => {
+                  const photoUrl = user.photo;
+                  if (photoUrl && photoUrl.startsWith('/uploads')) {
+                    return `http://localhost:3000${photoUrl}`;
+                  }
+                  return photoUrl;
+                })()
+              } />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                   {getInitials(user.name)}
                 </AvatarFallback>
