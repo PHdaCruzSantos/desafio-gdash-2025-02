@@ -1,8 +1,12 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { PokemonService } from './pokemon.service';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@ApiTags('pokemon') // Para ficar bonito no Swagger
+
+@ApiTags('pokemon')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('pokemon')
 export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) {}

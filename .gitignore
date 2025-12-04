@@ -2,10 +2,12 @@
 **/__pycache__/
 *.py[cod]
 
-# Node.js / NestJS
 **/node_modules/
 dist/
 npm-debug.log
+dist/
+backend-api/dist/
+node_modules/
 
 # Logs e Dados
 *.log

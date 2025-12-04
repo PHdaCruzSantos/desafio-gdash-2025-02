@@ -2,28 +2,43 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
+import { AuthProvider } from '@/contexts/auth.context' 
+import { PrivateRoute } from './components/private-route'
 
 import { MainLayout } from './layouts/main-layout'
 import { DashboardPage } from './pages/dashboard'
-import { UsersPage } from './pages/users'
+import { ProfilePage } from './pages/profile'
 import { ExplorePage } from './pages/explore'
+import { LoginPage } from './pages/login'
 
 const router = createBrowserRouter([
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
   {
     path: "/",
     element: <MainLayout />,
     children: [
       {
-        index: true, 
+        index: true,
         element: <DashboardPage />,
       },
       {
-        path: "users",
-        element: <UsersPage />,
+        path: "profile",
+        element: (
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        ),
       },
       {
         path: "explore",
-        element: <ExplorePage />,
+        element: (
+          <PrivateRoute>
+            <ExplorePage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
@@ -31,6 +46,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>,
 )
