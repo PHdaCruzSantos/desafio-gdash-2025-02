@@ -1,5 +1,4 @@
 services:
-  # 🐰 RabbitMQ (Message Broker)
   rabbitmq:
     image: rabbitmq:3-management
     container_name: desafioGDASH_rabbitmq
@@ -8,9 +7,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    # Portas definidas no override. Aqui se for prod
 
-  # 🍃 MongoDB (Banco de Dados)
   mongodb:
     image: mongo:latest
     container_name: desafioGDASH_mongo
@@ -22,7 +19,6 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  # 🐍 Weather Collector (Python)
   weather-collector:
     build:
       context: ./collector-weather
@@ -32,7 +28,6 @@ services:
       - rabbitmq
     env_file: .env
 
-  # 🐹 Worker (Go)
   weather-worker:
     build:
       context: ./worker-weather
@@ -40,7 +35,7 @@ services:
     container_name: desafioGDASH_worker_weather
     depends_on:
       - rabbitmq
-      - mongodb # quando for usar mongo cai precisar
+      - mongodb 
     env_file: .env
     environment:
       - RABBITMQ_HOST=rabbitmq

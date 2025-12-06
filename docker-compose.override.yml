@@ -1,5 +1,4 @@
 services:
-  # Nome do serviço deve ser igual ao do docker-compose.yml base
   weather-collector:
     volumes:
       - ./collector-weather:/app
