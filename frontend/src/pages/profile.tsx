@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Save, Trash2, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RouletteModal } from "@/components/roulette-modal";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -103,7 +104,6 @@ export function ProfilePage() {
       setLoading(true);
       const response = await UserService.uploadAvatar(user.id, file);
       
-      // response should contain the updated user with the new photo path
       updateUser({ photo: response.photo });
 
       toast({ title: "Foto atualizada!", description: "Sua nova foto de perfil foi salva." });
@@ -143,7 +143,10 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h2 className="text-3xl font-bold text-primary">Meu Perfil</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold text-primary">Meu Perfil</h2>
+        <RouletteModal />
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-4">
@@ -278,6 +281,28 @@ export function ProfilePage() {
           </Form>
         </CardContent>
       </Card>
+
+      {user.pokemonCollection && user.pokemonCollection.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Minha Coleção Pokémon</CardTitle>
+            <CardDescription>Você já capturou {user.pokemonCollection.length} Pokémons!</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {user.pokemonCollection.map((poke, index) => (
+                <div key={`${poke.id}-${index}`} className="flex flex-col items-center p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
+                  <img src={poke.sprite} alt={poke.name} className="w-24 h-24 drop-shadow-md" />
+                  <span className="font-bold capitalize mt-2">{poke.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(poke.capturedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

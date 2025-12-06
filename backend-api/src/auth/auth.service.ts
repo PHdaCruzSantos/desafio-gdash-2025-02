@@ -31,6 +31,8 @@ export class AuthService {
         id: user._id,
         photo: user.photo,
         description: user.description,
+        pokemonCollection: user.pokemonCollection,
+        lastSpin: user.lastSpin,
       }
     };
   }

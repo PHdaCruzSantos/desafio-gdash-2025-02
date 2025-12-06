@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type {ReactNode} from 'react'
-import { AuthService } from '@/service/api';
+import { AuthService, UserService } from '@/service/api';
 
 interface User {
   id: string;
@@ -8,6 +8,8 @@ interface User {
   email: string;
   photo?: string;
   description?: string;
+  pokemonCollection?: { id: number; name: string; sprite: string; capturedAt: string }[];
+  lastSpin?: string;
 }
 
 interface AuthContextType {
@@ -27,13 +29,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('gdash_token');
-    const savedUser = localStorage.getItem('gdash_user');
-    
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const initAuth = async () => {
+      const token = localStorage.getItem('gdash_token');
+      const savedUser = localStorage.getItem('gdash_user');
+      
+      if (token && savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        
+        // Fetch fresh data
+        try {
+          const freshUser = await UserService.getProfile(parsedUser.id);
+          const mappedUser = { ...freshUser, id: freshUser._id };
+          setUser(mappedUser);
+          localStorage.setItem('gdash_user', JSON.stringify(mappedUser));
+        } catch (error) {
+          console.error("Failed to refresh user data", error);
+          // Optional: logout if token is invalid?
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {

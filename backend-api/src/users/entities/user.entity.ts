@@ -19,6 +19,12 @@ export class User {
 
   @Prop()
   photo: string;
+
+  @Prop({ type: [{ id: Number, name: String, sprite: String, capturedAt: Date }] })
+  pokemonCollection: { id: number; name: string; sprite: string; capturedAt: Date }[];
+
+  @Prop()
+  lastSpin: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

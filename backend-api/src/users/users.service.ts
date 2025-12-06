@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.entity';
+import { PokemonService } from '../pokemon/pokemon.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private pokemonService: PokemonService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const salt = await bcrypt.genSalt();
@@ -77,5 +81,49 @@ export class UsersService {
 
     await this.userModel.findByIdAndDelete(id).exec();
     return { message: 'Usuário removido com sucesso' };
+  }
+
+  async spinRoulette(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    const now = new Date();
+    const COOLDOWN_SECONDS = 300; // 5 minutes
+
+    if (user.lastSpin) {
+      const diffSeconds = (now.getTime() - new Date(user.lastSpin).getTime()) / 1000;
+      if (diffSeconds < COOLDOWN_SECONDS) {
+        const remaining = Math.ceil(COOLDOWN_SECONDS - diffSeconds);
+        throw new HttpException(
+          { message: 'Aguarde o cooldown', remainingSeconds: remaining },
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
+    const randomId = Math.floor(Math.random() * 1025) + 1;
+    
+    let pokemonData;
+    try {
+      pokemonData = await this.pokemonService.findOne(randomId);
+    } catch (error) {
+      throw new HttpException('Erro ao sortear Pokémon', HttpStatus.BAD_GATEWAY);
+    }
+
+    const wonPokemon = {
+      id: pokemonData.id,
+      name: pokemonData.name,
+      sprite: pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default,
+      capturedAt: now,
+    };
+
+    user.pokemonCollection.push(wonPokemon);
+    user.lastSpin = now;
+    await user.save();
+
+    return {
+      pokemon: wonPokemon,
+      nextSpinAt: new Date(now.getTime() + COOLDOWN_SECONDS * 1000),
+    };
   }
 }

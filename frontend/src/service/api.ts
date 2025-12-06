@@ -57,11 +57,17 @@ export interface User {
   createdAt: string;
   description?: string;
   photo?: string;
+  pokemonCollection?: { id: number; name: string; sprite: string; capturedAt: string }[];
+  lastSpin?: string;
 }
 
 export const UserService = {
   getAll: async (): Promise<User[]> => {
     const response = await api.get<User[]>('/users');
+    return response.data;
+  },
+  getProfile: async (id: string): Promise<User> => {
+    const response = await api.get<User>(`/users/${id}`);
     return response.data;
   },
   create: async (data: { name: string; email: string; password: string }) => {
@@ -86,6 +92,10 @@ export const UserService = {
   },
   delete: async (id: string, password?: string) => {
     await api.delete(`/users/${id}`, { data: { password } });
+  },
+  spinRoulette: async () => {
+    const response = await api.post('/users/roulette');
+    return response.data;
   },
 };
 
