@@ -4,7 +4,6 @@ import json
 import config
 
 def get_connection():
-    """Gerencia a conexão com retry"""
     credentials = pika.PlainCredentials(config.RABBIT_USER, config.RABBIT_PASS)
     params = pika.ConnectionParameters(
         host=config.RABBIT_HOST, 
@@ -20,7 +19,6 @@ def get_connection():
             time.sleep(5)
 
 def setup():
-    """Inicializa a conexão e DECLARA a fila"""
     print("🐰 Conectando ao RabbitMQ...")
     connection = get_connection()
     channel = connection.channel()
@@ -30,7 +28,6 @@ def setup():
     return connection, channel
 
 def publish(channel, data):
-    """Publica o dicionário como JSON na fila"""
     if not data: return
 
     body_msg = json.dumps(data)
@@ -40,7 +37,7 @@ def publish(channel, data):
         routing_key=config.QUEUE_NAME,
         body=body_msg,
         properties=pika.BasicProperties(
-            delivery_mode=2, # Persistente (salva em disco)
+            delivery_mode=2,
         )
     )
     print(f"📤 [Enviado] {data['city']} | {data['temp']}°C")

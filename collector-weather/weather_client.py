@@ -3,11 +3,10 @@ import time
 import config
 
 def fetch_weather():
-    """Busca o JSON bruto da API"""
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={config.LAT}&lon={config.LON}&appid={config.API_KEY}&units={config.UNITS}&lang={config.LANG}"
 
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, timeout=300)
         res.raise_for_status()
         return res.json()
     except requests.exceptions.RequestException as e:
@@ -15,7 +14,6 @@ def fetch_weather():
         return None
 
 def process_data(data):
-    """Limpa e formata os dados"""
     if not data: return None
     
     rain_volume = data.get("rain", {}).get("1h", 0)

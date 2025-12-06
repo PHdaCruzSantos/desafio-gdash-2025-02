@@ -14,8 +14,8 @@ export function DashboardPage() {
   const [logs, setLogs] = useState<WeatherLog[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchData = async () => {
-    setLoading(true)
+  const fetchData = async (isBackgroundUpdate = false) => {
+    if (!isBackgroundUpdate) setLoading(true);
     try {
       const data = await WeatherService.getAll()
       setLogs(data)
@@ -27,7 +27,12 @@ export function DashboardPage() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData();
+    const itervalId = setInterval(() => {
+      fetchData();
+    }, 5* 60 * 1000);
+
+    return () => clearInterval(itervalId);
   }, [])
 
   const current = logs[0]
