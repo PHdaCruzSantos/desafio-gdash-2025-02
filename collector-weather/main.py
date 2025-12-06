@@ -4,11 +4,8 @@ import weather_client
 import rabbit_client
 
 def main():
-    print(f"🚀 Iniciando Coletor de Clima ({config.INTERVAL}s intervalo)")
+    print(f"🚀 Iniciando Coletor de Clima (Intervalo: {config.INTERVAL}s)")
     
-
-    connection, channel = rabbit_client.setup()
-
     try:
         while True:
             raw = weather_client.fetch_weather()
@@ -16,19 +13,15 @@ def main():
             
             if data:
                 print(f"📍 Lido: {data['description']} | {data['temp']}°C")
+                rabbit_client.send_message(data)
 
-            
-            rabbit_client.publish(channel, data)
-            
+            print(f"💤 Dormindo...")
             time.sleep(config.INTERVAL)
             
     except KeyboardInterrupt:
         print("\n🛑 Parando serviço...")
-        connection.close()
     except Exception as e:
-        print(f"❌ Erro Fatal: {e}")
-        if 'connection' in locals() and connection.is_open:
-            connection.close()
+        print(f"❌ Erro Fatal no Loop: {e}")
 
 if __name__ == "__main__":
     main()

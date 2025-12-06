@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, X, Filter, CloudRain, Flame, Zap, Snowflake, Cloud } from "lucide-react";
-import { PokemonService, WeatherService, api } from "@/service/api"; 
-import type {PokemonListResponse} from "@/service/api"
+import { ChevronLeft, ChevronRight, Search, CloudRain, Sparkles } from "lucide-react";
+import { PokemonService, api } from "@/service/api";
+import type {  PokemonListResponse } from "@/service/api";
 import { PokemonCard } from "@/components/pokemon-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/use-debounce";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
-import { getTypeColor } from "@/lib/pokemon-types";
-import { determinePokemonType } from "@/lib/weather-matcher";
-
 
 export function ExplorePage() {
   const [activeTab, setActiveTab] = useState("explorer");
@@ -55,8 +51,10 @@ export function ExplorePage() {
   }, [page, limit, activeTab]);
 
   useEffect(() => {
-    if (activeTab === "explorer" && debouncedSearch !== "") fetchData(1);
-    else if (activeTab === "explorer" && searchTerm === "" && !loading) fetchData(1);
+    if (activeTab === "explorer") {
+        if (debouncedSearch !== "") fetchData(1);
+        else if (searchTerm === "" && !loading) fetchData(1);
+    }
   }, [debouncedSearch]);
 
 
@@ -67,21 +65,23 @@ export function ExplorePage() {
     setWeatherResult(null);
 
     try {
-      
       const { data: weather } = await api.get(`/weather/current?city=${weatherCity}`);
       setWeatherResult(weather);
 
-      const isNight = weather.sys.sunset * 1000 < Date.now();
-      const type = determinePokemonType({
-        main: { temp: weather.temp },
-        weather: weather.weather,
-        wind: weather.wind,
-        sys: weather.sys
-      }, isNight);
+      let type = "normal";
+      const temp = weather.temp;
+      const condition = weather.main.toLowerCase();
+
+      if (condition.includes("rain") || condition.includes("drizzle")) type = "water";
+      else if (condition.includes("thunder")) type = "electric";
+      else if (condition.includes("snow")) type = "ice";
+      else if (temp >= 30) type = "fire";
+      else if (temp >= 20 && condition.includes("clear")) type = "grass";
+      else if (condition.includes("clouds")) type = "flying";
+      else if (temp < 10) type = "ice";
       
       setMatchedType(type);
 
-      
       const pokemons = await PokemonService.getAll(1, 12, type); 
       setMatchedPokemons(pokemons.data);
 
@@ -108,12 +108,13 @@ export function ExplorePage() {
           <TabsTrigger value="matcher">Radar Climático</TabsTrigger>
         </TabsList>
 
-          
         <TabsContent value="explorer" className="space-y-6 mt-6">
            
-           <div className="flex gap-4">
+           <div className="relative w-full max-w-md">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Pesquisar pokémon..." 
+                placeholder="Pesquisar pokémon por nome..." 
+                className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -124,8 +125,36 @@ export function ExplorePage() {
                 ? Array.from({ length: limit }).map((_, i) => <div key={i} className="h-72 bg-muted/20 animate-pulse rounded-xl" />)
                 : data?.data.map((p) => <PokemonCard key={p.name} name={p.name} />)
             }
+            {!loading && data?.data.length === 0 && (
+                <div className="col-span-full text-center py-10 text-muted-foreground">
+                    Nenhum Pokémon encontrado.
+                </div>
+            )}
            </div>
            
+           {data && !debouncedSearch && data.data.length > 0 && (
+            <div className="flex items-center justify-center gap-4 mt-8 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1 || loading}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
+              </Button>
+              
+              <span className="text-sm font-medium text-muted-foreground">
+                Página <span className="text-foreground font-bold">{page}</span> de {data.totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                disabled={page >= data.totalPages || loading}
+              >
+                Próximo <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+           )}
         </TabsContent>
 
         <TabsContent value="matcher" className="mt-6 space-y-8">
@@ -140,20 +169,17 @@ export function ExplorePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2 max-w-md">
-                <div className="flex gap-2 max-w-md items-start">
-                  <div className="flex-1">
+              
+              <div className="flex gap-2 max-w-md items-start">
+                <div className="flex-1">
                     <CityAutocomplete 
-                      onSelect={(city) => {
-                        setWeatherCity(city);
-                      }} 
-                      placeholder="Ex: Tokyo, Rio de Janeiro..."
+                        onSelect={(city) => setWeatherCity(city)} 
+                        placeholder="Ex: Tokyo, London..."
                     />
-                  </div>
-                  <Button onClick={handleWeatherSearch} disabled={loadingMatch || !weatherCity}>
-                    {loadingMatch ? "Analisando..." : "Investigar"}
-                  </Button>
                 </div>
+                <Button onClick={handleWeatherSearch} disabled={loadingMatch || !weatherCity}>
+                  {loadingMatch ? "Analisando..." : "Investigar"}
+                </Button>
               </div>
 
               {weatherResult && (
@@ -168,13 +194,16 @@ export function ExplorePage() {
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-sm text-muted-foreground">Tipo Detectado</p>
-                      <Badge className={`text-lg px-4 py-1 uppercase tracking-widest border-none text-white shadow-lg bg-gradient-to-r ${getTypeColor(matchedType || 'normal')}`}>
+                      <Badge className="text-lg px-4 py-1 uppercase tracking-widest bg-gradient-to-r from-indigo-500 to-purple-500 border-none text-white shadow-lg">
                         {matchedType}
                       </Badge>
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold mb-4">Pokémons Atuando na Região:</h3>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-indigo-500" />
+                    Pokémons Atuando na Região:
+                  </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     {matchedPokemons.map((p) => (
                       <PokemonCard key={p.name} name={p.name} />
