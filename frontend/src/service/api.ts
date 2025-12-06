@@ -109,6 +109,11 @@ export const WeatherService = {
   exportCsv: () => {
     window.open('http://localhost:3000/weather/export/csv', '_blank');
   },
+
+  searchCities: async (query: string) => {
+    const response = await api.get(`/weather/cities?q=${query}`);
+    return response.data;
+  },
   
   exportXlsx: () => {
     window.open('http://localhost:3000/weather/export/xlsx', '_blank');
@@ -140,15 +145,13 @@ export interface PokemonDetails {
 }
 
 export const PokemonService = {
-  // Busca a lista paginada
-  getAll: async (page = 1, limit = 12): Promise<PokemonListResponse> => {
+  getAll: async (page = 1, limit = 12, type?: string): Promise<PokemonListResponse> => {
     const response = await api.get<PokemonListResponse>('/pokemon', {
-      params: { page, limit },
+      params: { page, limit, type },
     });
     return response.data;
   },
 
-  // Busca detalhes de UM pokémon pelo nome ou ID
   getDetails: async (idOrName: string | number): Promise<PokemonDetails> => {
     const response = await api.get<PokemonDetails>(`/pokemon/${idOrName}`);
     return response.data;

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Res,
+  Query,
 } from '@nestjs/common';
 import { WeatherService } from './weather.service';
 import { CreateWeatherDto } from './dto/create-weather.dto';
@@ -81,11 +82,22 @@ export class WeatherController {
       });
     }
   }
+  
+  @Get('cities') // GET /weather/cities?q=Belo
+  async searchCities(@Query('q') query: string) {
+    return this.weatherService.searchCities(query);
+  }
 
   @Post('analysis') 
   @ApiOperation({ summary: 'Gera um insight de IA sob demanda' })
   async generateAnalysis(@Body() dto: AnalysisRequestDto) {
     return this.weatherService.requestAnalysis(dto);
+  }
+
+  @Get('current')
+  async getCurrentWeather(@Query('city') city: string) {
+    if (!city) return { error: 'Cidade obrigatória' };
+    return this.weatherService.getCurrentWeatherForCity(city);
   }
 
   @Get()

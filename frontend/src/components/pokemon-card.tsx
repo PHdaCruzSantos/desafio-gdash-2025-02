@@ -16,7 +16,6 @@ export function PokemonCard({ name }: PokemonCardProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Busca detalhes para pegar imagem e tipos
     PokemonService.getDetails(name)
       .then(setData)
       .catch((err) => console.error(err))
@@ -36,11 +35,9 @@ export function PokemonCard({ name }: PokemonCardProps) {
       "relative overflow-hidden border-none shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl group",
       `bg-gradient-to-br ${gradientClass}`
     )}>
-      {/* Background Decorativo (Bolha) */}
       <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/20 blur-2xl transition-all group-hover:bg-white/30" />
 
       <CardContent className="flex flex-col items-center p-6">
-        {/* Imagem (com efeito de flutuar) */}
         <div className="relative z-10 h-40 w-40 drop-shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
           <img
             src={imageUrl}
@@ -50,7 +47,6 @@ export function PokemonCard({ name }: PokemonCardProps) {
           />
         </div>
 
-        {/* Nome e ID */}
         <div className="mt-4 flex w-full flex-col items-center gap-2 z-10">
           <span className="text-xs font-bold text-white/70">
             #{String(data.id).padStart(3, "0")}
@@ -59,7 +55,6 @@ export function PokemonCard({ name }: PokemonCardProps) {
             {name}
           </h3>
 
-          {/* Badges de Tipos */}
           <div className="flex gap-2 mt-1">
             {data.types.map((t) => (
               <Badge 

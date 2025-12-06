@@ -7,11 +7,12 @@ import { UserService } from "@/service/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Save, Trash2, Camera } from "lucide-react";
+import { Loader2, Save, Trash2, Camera, MapPin, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RouletteModal } from "@/components/roulette-modal";
 
@@ -209,10 +210,27 @@ export function ProfilePage() {
                     </FormControl>
                     <CardDescription>O email não pode ser alterado.</CardDescription>
                     <FormMessage />
+                    <div className="space-y-2">
+                    <FormLabel className="flex items-center gap-2 text-muted-foreground">
+                      Localização Monitorada <Badge variant="outline" className="text-[10px] h-5">Em Breve</Badge>
+                    </FormLabel>
+                    <div className="relative">
+                      <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        disabled 
+                        placeholder="Belo Horizonte, MG (Padrão)" 
+                        className="pl-9 bg-muted/50 border-dashed" 
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Atualmente o sistema monitora apenas a região padrão do servidor.
+                    </p>
+                  </div>
                   </FormItem>
                 )}
               />
-
+            
               <FormField
                 control={form.control}
                 name="description"

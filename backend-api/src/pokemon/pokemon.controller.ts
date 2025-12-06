@@ -18,8 +18,13 @@ export class PokemonController {
   findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
+    @Query('type') type?: string, // <--- O parâmetro TEM que estar aqui
   ) {
-    // Convertendo string da query para number
+    // SE tiver tipo E não for 'all', chama o serviço específico
+    if (type && type !== 'all') {
+      return this.pokemonService.findByType(type, +page, +limit);
+    }
+    // Senão, chama o geral
     return this.pokemonService.findAll(+page, +limit);
   }
 
