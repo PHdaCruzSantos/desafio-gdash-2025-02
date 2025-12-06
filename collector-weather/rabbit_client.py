@@ -4,7 +4,6 @@ import json
 import config
 
 def get_connection():
-    """Gerencia a conexão com retry"""
     credentials = pika.PlainCredentials(config.RABBIT_USER, config.RABBIT_PASS)
     params = pika.ConnectionParameters(
         host=config.RABBIT_HOST, 
@@ -12,7 +11,6 @@ def get_connection():
         credentials=credentials
     )
 
-    # Tenta conectar algumas vezes antes de desistir
     for _ in range(5):
         try:
             return pika.BlockingConnection(params)
@@ -20,15 +18,9 @@ def get_connection():
             print(f"⚠️ RabbitMQ indisponível em {config.RABBIT_HOST}. Tentando em 5s...")
             time.sleep(5)
     
-    # Se falhar 5 vezes, levanta erro para o main tratar
     raise Exception("Não foi possível conectar ao RabbitMQ após várias tentativas.")
 
 def send_message(data):
-    """
-    NOVA LÓGICA: Stateless (Sem estado).
-    Abre conexão, envia e fecha imediatamente.
-    Isso evita o erro de Timeout/Heartbeat durante o sleep longo.
-    """
     if not data: return
 
     connection = None

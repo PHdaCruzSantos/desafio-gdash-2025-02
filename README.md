@@ -3,7 +3,7 @@
 Solução completa para o desafio técnico GDASH. Um sistema de monitoramento climático distribuído, utilizando microsserviços, mensageria assíncrona, inteligência artificial generativa e visualização de dados em tempo real.
 
 ![Dashboard Preview](preview.png) 
-*(Sugestão: Substitua esse link por um print real do seu dashboard)*
+
 
 ## 🚀 Arquitetura da Solução
 
@@ -14,6 +14,18 @@ O sistema foi projetado seguindo o padrão de **Microsserviços** e **Event-Driv
 3.  **Worker (Go):** Um consumidor de alta performance que lê a fila, valida os dados e os envia para a API.
 4.  **Backend (NestJS):** API REST que gerencia regras de negócio, persistência (MongoDB), autenticação (JWT) e integração com IA (Gemini).
 5.  **Frontend (React + Vite):** Dashboard interativo com gráficos em tempo real, autenticação e áreas de exploração.
+
+#### Estrutura do projeto
+```plaintext
+desafio_gdash_2025_02/
+├── docker-compose.yml           # O regente da orquestra
+├── docker-compose.overrride.yml # Ambientes
+├── .env                         # Variáveis globais
+├── collector-weather/           # Serviço Python
+├── worker-weather/              # Serviço Go
+├── backend-api/                 # NestJS + TS
+└── frontend/                    # React + Vite
+```
 
 ---
 
@@ -80,14 +92,12 @@ O sistema foi projetado seguindo o padrão de **Microsserviços** e **Event-Driv
     RABBITMQ_PORT=5672
     RABBITMQ_UI_PORT=15672
     
-    # --- Integrações Externas ---
     # Obtenha sua chave em: [https://openweathermap.org/api](https://openweathermap.org/api)
     OPENWEATHER_API_KEY=sua_chave_openweather_aqui
     
     # Obtenha sua chave em: [https://aistudio.google.com/](https://aistudio.google.com/)
     GEMINI_API_KEY=sua_chave_gemini_aqui
     
-    # --- Configurações do App ---
     WEATHER_CITY=Belo Horizonte
     WEATHER_LAT=-19.9167
     WEATHER_LON=-43.9345
@@ -102,8 +112,12 @@ O sistema foi projetado seguindo o padrão de **Microsserviços** e **Event-Driv
 
 4.  **Acesse a Aplicação:**
     * **Frontend:** [http://localhost:5173](http://localhost:5173)
-    * **API (Swagger):** [http://localhost:3000/api](http://localhost:3000/api)
+    * **API (Swagger):** [http://localhost:3000/weather/docs](http://localhost:3000/weather/docs)
     * **RabbitMQ:** [http://localhost:15672](http://localhost:15672) (User: `user`, Pass: `password`)
+
+5. **Usuário Padrão:**
+    * **Email:** admin@gdash.com
+    * **Senha:** 123456
 
 ---
 
@@ -138,4 +152,4 @@ Durante o desenvolvimento, algumas decisões arquiteturais foram tomadas para ga
 > 📘 **Quer saber mais?**
 > Confira meu [Diário de Bordo Completo](./Diário%20de%20Bordo.md) onde documentei passo a passo os desafios técnicos (como o *Variable Shadowing* no Go) e a evolução do projeto.
 
-Desenvolvido por **Pedro Henrique da Cruz Santos** para o Desafio GDASH.
+Desenvolvido por **Pedro Henrique da Cruz Santos** para o Desafio [GDASH](https://gdash.io/).

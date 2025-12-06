@@ -2,6 +2,12 @@ services:
   weather-collector:
     volumes:
       - ./collector-weather:/app
+  rabbitmq:
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_UI_PORT}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   backend:
     command: npm run start:dev

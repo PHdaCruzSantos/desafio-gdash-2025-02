@@ -20,7 +20,7 @@ const profileSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
   description: z.string().optional(),
-  photo: z.string().url("URL da foto inválida").optional().or(z.literal('')),
+  photo: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
