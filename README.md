@@ -4,6 +4,8 @@ Solução completa para o desafio técnico GDASH. Um sistema de monitoramento cl
 
 ![Dashboard Preview](preview.png) 
 
+## 📺 Vídeo de Demonstração
+[![Assista ao Vídeo](https://img.youtube.com/vi/Sm0yyEqfzwA/maxresdefault.jpg)](https://youtu.be/Sm0yyEqfzwA)
 
 ## 🚀 Arquitetura da Solução
 
@@ -21,6 +23,7 @@ desafio_gdash_2025_02/
 ├── docker-compose.yml           # O regente da orquestra
 ├── docker-compose.overrride.yml # Ambientes
 ├── .env                         # Variáveis globais
+├── uploads/                     # Uploads das imagens do usuario
 ├── collector-weather/           # Serviço Python
 ├── worker-weather/              # Serviço Go
 ├── backend-api/                 # NestJS + TS & MongoDB
