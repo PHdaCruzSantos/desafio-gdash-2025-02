@@ -23,7 +23,7 @@ desafio_gdash_2025_02/
 ├── .env                         # Variáveis globais
 ├── collector-weather/           # Serviço Python
 ├── worker-weather/              # Serviço Go
-├── backend-api/                 # NestJS + TS
+├── backend-api/                 # NestJS + TS & MongoDB
 └── frontend/                    # React + Vite
 ```
 

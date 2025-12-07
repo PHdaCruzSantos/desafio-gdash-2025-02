@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, CloudRain, Sparkles } from "lucide-react";
 import { PokemonService, api } from "@/service/api";
-import type {  PokemonListResponse } from "@/service/api";
+import type { PokemonDetails } from "@/service/api";
 import { PokemonCard } from "@/components/pokemon-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,8 @@ export function ExplorePage() {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
-  const [data, setData] = useState<PokemonListResponse | null>(null);
+  const [pokemons, setPokemons] = useState<PokemonDetails[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 600);
@@ -24,7 +25,7 @@ export function ExplorePage() {
   const [weatherCity, setWeatherCity] = useState("");
   const [weatherResult, setWeatherResult] = useState<any>(null);
   const [matchedType, setMatchedType] = useState<string | null>(null);
-  const [matchedPokemons, setMatchedPokemons] = useState<any[]>([]);
+  const [matchedPokemons, setMatchedPokemons] = useState<PokemonDetails[]>([]);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
   const fetchData = async (overridePage = page) => {
@@ -32,13 +33,22 @@ export function ExplorePage() {
       try {
         if (debouncedSearch) {
           const detail = await PokemonService.getDetails(debouncedSearch.toLowerCase());
-          setData({ data: [{ name: detail.name, url: "" }], total: 1, totalPages: 1 });
+          setPokemons([detail]);
+          setTotalPages(1);
         } else {
           const response = await PokemonService.getAll(overridePage, limit);
-          setData(response);
+          setTotalPages(response.totalPages);
+          
+          const details = await Promise.all(
+            response.data.map(p => PokemonService.getDetails(p.name))
+          );
+          setPokemons(details);
         }
       } catch (error) {
-        if (debouncedSearch) setData({ data: [], total: 0, totalPages: 0 });
+        if (debouncedSearch) {
+            setPokemons([]);
+            setTotalPages(0);
+        }
       } finally {
         setLoading(false);
       }
@@ -82,8 +92,11 @@ export function ExplorePage() {
       
       setMatchedType(type);
 
-      const pokemons = await PokemonService.getAll(1, 12, type); 
-      setMatchedPokemons(pokemons.data);
+      const response = await PokemonService.getAll(1, 12, type); 
+      const details = await Promise.all(
+        response.data.map(p => PokemonService.getDetails(p.name))
+      );
+      setMatchedPokemons(details);
 
     } catch (error) {
       console.error(error);
@@ -123,16 +136,16 @@ export function ExplorePage() {
            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {loading
                 ? Array.from({ length: limit }).map((_, i) => <div key={i} className="h-72 bg-muted/20 animate-pulse rounded-xl" />)
-                : data?.data.map((p) => <PokemonCard key={p.name} name={p.name} />)
+                : pokemons.map((p) => <PokemonCard key={p.name} data={p} />)
             }
-            {!loading && data?.data.length === 0 && (
+            {!loading && pokemons.length === 0 && (
                 <div className="col-span-full text-center py-10 text-muted-foreground">
                     Nenhum Pokémon encontrado.
                 </div>
             )}
            </div>
            
-           {data && !debouncedSearch && data.data.length > 0 && (
+           {!loading && !debouncedSearch && pokemons.length > 0 && (
             <div className="flex items-center justify-center gap-4 mt-8 pt-4 border-t">
               <Button
                 variant="outline"
@@ -143,13 +156,13 @@ export function ExplorePage() {
               </Button>
               
               <span className="text-sm font-medium text-muted-foreground">
-                Página <span className="text-foreground font-bold">{page}</span> de {data.totalPages}
+                Página <span className="text-foreground font-bold">{page}</span> de {totalPages}
               </span>
 
               <Button
                 variant="outline"
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                disabled={page >= data.totalPages || loading}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages || loading}
               >
                 Próximo <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -206,7 +219,7 @@ export function ExplorePage() {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     {matchedPokemons.map((p) => (
-                      <PokemonCard key={p.name} name={p.name} />
+                      <PokemonCard key={p.name} data={p} />
                     ))}
                   </div>
                 </div>

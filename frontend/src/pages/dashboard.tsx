@@ -9,19 +9,17 @@ import { AiInsightCard } from "@/components/dashboard/ai-insight"
 import { HistoryTable } from "@/components/dashboard/history-table"
 import { ChartsGrid } from "@/components/dashboard/chart-grid"
 
-const UPDATE_INTERVAL_SECONDS = 300;
+
 
 export function DashboardPage() {
   const [logs, setLogs] = useState<WeatherLog[]>([])
   const [loading, setLoading] = useState(true)
-  const [timeLeft, setTimeLeft] = useState(UPDATE_INTERVAL_SECONDS)
 
   const fetchData = async (isBackground = false) => {
     if (!isBackground) setLoading(true)
     try {
       const data = await WeatherService.getAll()
       setLogs(data)
-      setTimeLeft(UPDATE_INTERVAL_SECONDS)
     } catch (error) {
       console.error("Erro ao buscar dados", error)
     } finally {
@@ -31,18 +29,6 @@ export function DashboardPage() {
 
   useEffect(() => {
     fetchData()
-
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          fetchData(true) 
-          return UPDATE_INTERVAL_SECONDS
-        }
-        return prevTime - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
   }, [])
 
   const current = logs[0]
@@ -55,7 +41,7 @@ export function DashboardPage() {
     <div className="space-y-6">
       <DashboardHeader 
         cityName={current?.city} 
-        timeLeft={timeLeft} 
+        onRefresh={() => fetchData(true)} 
       />
 
       <div className="grid gap-6">

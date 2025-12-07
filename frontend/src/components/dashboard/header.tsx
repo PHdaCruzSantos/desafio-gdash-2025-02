@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { Download, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WeatherService } from "@/service/api"
@@ -5,10 +6,27 @@ import { Badge } from "@/components/ui/badge"
 
 interface DashboardHeaderProps {
   cityName?: string
-  timeLeft: number 
+  onRefresh: () => void
 }
 
-export function DashboardHeader({ cityName, timeLeft }: DashboardHeaderProps) {
+const UPDATE_INTERVAL_SECONDS = 300;
+
+export function DashboardHeader({ cityName, onRefresh }: DashboardHeaderProps) {
+  const [timeLeft, setTimeLeft] = useState(UPDATE_INTERVAL_SECONDS)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          onRefresh()
+          return UPDATE_INTERVAL_SECONDS
+        }
+        return prevTime - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [onRefresh])
   
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
